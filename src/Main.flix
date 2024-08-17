@@ -1,5 +1,35 @@
 // The main entry point.
-def main(): Unit \ IO = println(toText(99))
+def main(): Unit \ IO = {
+    let r = Random.fresh();
+    runRounds(r)
+}
+
+def runRounds(r: Random): Unit \ IO = {
+    match runRound(r) {
+        case None => ()
+        case Some(_) => runRounds(r)
+    }
+}
+
+def runRound(r: Random): Option[Unit] \ IO = {
+    let num = Random.nextNatWithMax(r, 100);
+    let expected = toText(num);
+    forM (
+        actual <- prompt(num)
+    ) yield {
+        if (expected == actual) {
+            () // do nothing
+        } else {
+            Console.println(expected)
+        }
+    }
+}
+
+def prompt(num: Int32): Option[String] \ IO = {
+    Console.print("${num} = ");
+    Console.flush();
+    Console.readLine() |> Result.toOption
+}
 
 enum Digit {
     case D0
